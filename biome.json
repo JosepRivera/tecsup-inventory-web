@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!src/index.css"]
+    "includes": ["**", "!src/index.css", "!src/components/ui"]
   },
   "formatter": {
     "enabled": true,

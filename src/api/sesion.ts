@@ -19,3 +19,13 @@ export const actualizarContexto = async (data: SesionUpdate): Promise<SesionResp
 export const cerrarSesion = async (): Promise<void> => {
   await client.post("/api/sesion/cerrar");
 };
+
+export const obtenerSesiones = async (): Promise<SesionResponse[]> => {
+  const res = await client.get<SesionResponse[]>("/api/sesion");
+  return res.data;
+};
+
+export const obtenerSesion = async (id: number): Promise<SesionResponse> => {
+  const res = await client.get<SesionResponse>(`/api/sesion/${id}`);
+  return res.data;
+};

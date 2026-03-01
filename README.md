@@ -85,13 +85,13 @@ Se conecta al backend [tecsup-inventory-api](https://github.com/JosepRivera/tecs
 
 | Módulo                                                                                     | Estado         |
 | ------------------------------------------------------------------------------------------ | -------------- |
-| **Sesión de trabajo** — Configura pabellón, laboratorio y armario antes de inventariar     | ✅ Listo        |
-| **OCR de etiquetas** — Toma foto con el celular → formulario prellenado con IA             | ✅ Listo        |
+| **Sesión de trabajo** — Soporte multi-usuario: cada técnico tiene su propia jornada independiente | ✅ Listo        |
+| **OCR de etiquetas** — Toma foto con el celular o sube desde galería → IA             | ✅ Listo        |
 | **Dictado de voz** — Habla para registrar o consultar un activo                            | ✅ Listo        |
-| **Dashboard de sesión** — Listado en tiempo real con opción de deshacer el último registro | ✅ Listo        |
-| **Búsqueda rápida** — Busca activos por nombre, modelo o número de serie                   | ✅ Listo        |
-| **Exportar PDF / Excel** — Descarga el resumen de la jornada al finalizar                  | ✅ Listo        |
-| **PWA** — Instalable en pantalla de inicio del celular, funciona sin conexión parcialmente | 🔜 Próximamente |
+| **Dashboard** — Listado filtrado por técnico con trazabilidad y exportación global          | ✅ Listo        |
+| **Búsqueda en tiempo real** — Busca activos al instante con carga paginada                 | ✅ Listo        |
+| **Mobile First** — Interfaz optimizada para el uso táctil en laboratorios                  | ✅ Listo        |
+| **PWA** — Instalable en pantalla de inicio del celular                                     | 🔜 Próximamente |
 
 ---
 

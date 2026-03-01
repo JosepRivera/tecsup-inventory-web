@@ -1,4 +1,4 @@
-import type { ActivoResponse, DashboardResumen } from "@/types";
+import type { ActivoResponse, DashboardResumen, GlobalStats } from "@/types";
 import client from "./client";
 
 export const obtenerActivos = async (): Promise<ActivoResponse[]> => {
@@ -13,4 +13,9 @@ export const obtenerResumen = async (): Promise<DashboardResumen> => {
 
 export const eliminarActivo = async (id: number): Promise<void> => {
   await client.delete(`/api/dashboard/activos/${id}`);
+};
+
+export const obtenerEstadisticasGlobales = async (): Promise<GlobalStats> => {
+  const res = await client.get<GlobalStats>("/api/dashboard/estadisticas/global");
+  return res.data;
 };

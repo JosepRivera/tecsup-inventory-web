@@ -1,3 +1,14 @@
+export interface ActivoBase {
+  nombre: string | null;
+  marca: string | null;
+  modelo: string | null;
+  tipo: string | null;
+  numero_serie: string | null;
+  estado: string | null;
+  ubicacion: string | null;
+  observaciones: string | null;
+}
+
 export interface ActivoCreate {
   nombre: string | null;
   marca: string | null;
@@ -22,6 +33,7 @@ export interface ActivoResponse {
   ubicacion: string | null;
   observaciones: string | null;
   sesion_id: number | null;
+  tecnico: string | null;
   origen: string | null;
   creado_en: string | null;
 }
@@ -55,12 +67,14 @@ export interface VozResponse {
 }
 
 export interface SesionCreate {
+  tecnico: string;
   pabellon: string | null;
   laboratorio: string | null;
   armario: string | null;
 }
 
 export interface SesionUpdate {
+  tecnico?: string | null;
   pabellon: string | null;
   laboratorio: string | null;
   armario: string | null;
@@ -68,6 +82,7 @@ export interface SesionUpdate {
 
 export interface SesionResponse {
   id: number;
+  tecnico: string | null;
   pabellon: string | null;
   laboratorio: string | null;
   armario: string | null;
@@ -82,4 +97,11 @@ export interface DashboardResumen {
     voz: number;
     manual: number;
   };
+}
+
+export interface GlobalStats {
+  total_activos: number;
+  total_sesiones: number;
+  por_tipo: Record<string, number>;
+  por_estado: Record<string, number>;
 }
