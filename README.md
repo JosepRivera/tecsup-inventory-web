@@ -21,16 +21,15 @@ Escanea etiquetas con la cámara del celular o dicta por voz — sin instalar na
 ## Tabla de Contenidos
 
 - [Tecsup Inventory Web](#tecsup-inventory-web)
-  - [Tabla de Contenidos](#tabla-de-contenidos)
   - [Descripción](#descripción)
   - [Tech Stack](#tech-stack)
-  - [Funcionalidades](#funcionalidades)
+  - [Pantallas de la Aplicación](#pantallas-de-la-aplicación)
   - [Estructura del Proyecto](#estructura-del-proyecto)
-  - [Variables de Entorno](#variables-de-entorno)
   - [Requisitos Previos](#requisitos-previos)
-  - [Instalación y Setup](#instalación-y-setup)
+  - [Instalación y Configuración](#instalación-y-configuración)
+  - [Inicialización y Tecnologías](#inicialización-y-tecnologías)
+  - [Uso de shadcn/ui](#uso-de-shadcnui)
   - [Scripts Disponibles](#scripts-disponibles)
-  - [Backend Requerido](#backend-requerido)
   - [Equipo](#equipo)
   - [Licencia](#licencia)
 
@@ -49,208 +48,222 @@ Se conecta al backend [tecsup-inventory-api](https://github.com/JosepRivera/tecs
 ## Tech Stack
 
 **Core**
-
-![React](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite_SWC-9B59B6?style=flat-square&logo=vite&logoColor=white)
+- **React 19**: Biblioteca UI principal.
+- **TypeScript 5.9**: Tipado estático para robustez.
+- **Vite 7**: Empaquetador rápido y moderno.
 
 **UI & Estilos**
-
-![Tailwind](https://img.shields.io/badge/Tailwind_v4-0F172A?style=flat-square&logo=tailwindcss&logoColor=38BDF8)
-![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-18181B?style=flat-square&logoColor=white)
-![Lucide](https://img.shields.io/badge/Lucide_React-1E293B?style=flat-square&logoColor=white)
-
-**Formularios & Validación**
-
-![React Hook Form](https://img.shields.io/badge/React_Hook_Form-EC5990?style=flat-square&logo=reacthookform&logoColor=white)
-![Zod](https://img.shields.io/badge/Zod-1E3A5F?style=flat-square&logoColor=white)
-
-**Estado & Navegación**
-
-![Zustand](https://img.shields.io/badge/Zustand-2C2C2C?style=flat-square&logoColor=white)
-![React Router](https://img.shields.io/badge/React_Router_v7-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
-
-**HTTP & Cámara**
-
-![Axios](https://img.shields.io/badge/Axios-372B8C?style=flat-square&logo=axios&logoColor=white)
-![react-webcam](https://img.shields.io/badge/react--webcam-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-
-**Calidad de Código**
-
-![Biome](https://img.shields.io/badge/Biome-1E293B?style=flat-square&logo=biome&logoColor=60A5FA)
+- **Tailwind CSS v4**: Estilos modernos y configurables.
+- **shadcn/ui**: Componentes de UI accesibles y personalizables.
+- **Lucide React**: Set de iconos optimizado.
 
 ---
 
-## Funcionalidades
+## Pantallas de la Aplicación
 
-| Módulo                                                                                     | Estado         |
-| ------------------------------------------------------------------------------------------ | -------------- |
-| **Sesión de trabajo** — Soporte multi-usuario: cada técnico tiene su propia jornada independiente | ✅ Listo        |
-| **OCR de etiquetas** — Toma foto con el celular o sube desde galería → IA             | ✅ Listo        |
-| **Dictado de voz** — Habla para registrar o consultar un activo                            | ✅ Listo        |
-| **Dashboard** — Listado filtrado por técnico con trazabilidad y exportación global          | ✅ Listo        |
-| **Búsqueda en tiempo real** — Busca activos al instante con carga paginada                 | ✅ Listo        |
-| **Mobile First** — Interfaz optimizada para el uso táctil en laboratorios                  | ✅ Listo        |
-| **PWA** — Instalable en pantalla de inicio del celular                                     | 🔜 Próximamente |
+La app consta de **7 pantallas** organizadas por flujo de trabajo. Una barra de navegación inferior fija (visible una vez iniciada la sesión) da acceso rápido a las cuatro pantallas principales: Escanear, Voz, Dashboard y Búsqueda.
+
+| Ruta | Pantalla | Protegida |
+| :--- | :--- | :---: |
+| `/` | Configurar Sesión | — |
+| `/camara` | Escanear Etiqueta (OCR) | ✓ |
+| `/voz` | Dictado de Voz | ✓ |
+| `/dashboard` | Dashboard de Jornada | ✓ |
+| `/busqueda` | Búsqueda de Activos | ✓ |
+| `/historial` | Historial de Sesiones | ✓ |
+| `/estadisticas` | Estadísticas Globales | ✓ |
+
+> Las rutas protegidas requieren una sesión activa. Sin ella, se redirige automáticamente a `/`.
+
+---
+
+### `/` — Configurar Sesión
+
+Pantalla de inicio y único punto de entrada público. El técnico configura el contexto de trabajo antes de comenzar a inventariar.
+
+**Campos del formulario:**
+- **Nombre y Apellido** del técnico (se persiste en `localStorage` para la próxima jornada).
+- **Pabellón** (selector con opciones A–G + campo libre "Otro").
+- **Laboratorio** (selector con 8 opciones predefinidas + campo libre "Otro").
+- **Armario / Fila** (campo opcional).
+
+Al enviar, se crea la sesión en el backend y se redirige automáticamente a `/camara`.
+
+---
+
+### `/camara` — Escanear Etiqueta (OCR)
+
+Permite registrar un activo fotografiando su etiqueta. La imagen se envía al backend donde **Claude Vision** extrae los datos.
+
+**Flujo en dos pasos:**
+1. **Captura**: Botón para abrir la cámara trasera del dispositivo directamente, o alternativamente subir una imagen desde la galería. Muestra previsualización de la foto tomada.
+2. **Resultado OCR**: Formulario editable pre-rellenado con los datos extraídos (nombre, marca, modelo, tipo, número de serie, observaciones). Muestra el texto crudo detectado y un badge de nivel de **confianza** (alta / media / baja). El técnico puede corregir cualquier campo antes de confirmar.
+
+Al confirmar, el activo se guarda y se redirige al Dashboard.
+
+---
+
+### `/voz` — Dictado de Voz
+
+Permite registrar un activo o consultar el inventario de forma oral. El audio se transcribe con **Groq Whisper** y la IA interpreta la intención.
+
+**Flujo en dos pasos:**
+1. **Grabación**: Botón para iniciar/detener la grabación. El icono de micrófono pulsa en rojo mientras graba.
+2. **Resultado** (dos modos según la intención detectada):
+   - **Registro**: Si se dictan datos de un activo, se muestra un formulario editable pre-rellenado (igual que OCR) con la transcripción visible. El técnico confirma para guardar.
+   - **Consulta**: Si se pregunta por un dispositivo (p. ej. *"¿Dónde está el Dell Latitude?"*), se muestran las coincidencias del inventario en tarjetas con nombre, marca, tipo, estado y ubicación.
+
+---
+
+### `/dashboard` — Dashboard de Jornada
+
+Vista central de la sesión en curso. Muestra un resumen de los activos registrados y centraliza las acciones principales.
+
+**Secciones:**
+- **Resumen**: Tres contadores — Total de activos, registrados por OCR y registrados por Voz.
+- **Navegación rápida**: Accesos directos a Historial y Estadísticas.
+- **Exportar Sesión Actual**: Genera un PDF o Excel con los activos de la sesión en curso.
+- **Exportación de Inventario Total**: Genera un PDF Global o Excel Global con todo el patrimonio registrado en el sistema.
+- **Lista de activos**: Tarjetas por cada activo con acciones de **editar** (abre un diálogo modal con todos los campos: nombre, marca, modelo, tipo, serie, estado, ubicación, observaciones) y **eliminar** (con confirmación de alerta).
+
+---
+
+### `/busqueda` — Búsqueda de Activos
+
+Buscador en tiempo real sobre el inventario completo (no solo la sesión activa).
+
+- Búsqueda instantánea con debounce de 400 ms al escribir.
+- Sin texto en el campo, muestra **todos los activos** del sistema paginados.
+- Con texto, filtra por nombre, marca, modelo, serie, etc.
+- Paginación tipo "Cargar más" (20 ítems por página).
+- Indicador del número de resultados con badge numérico.
+
+---
+
+### `/historial` — Historial de Sesiones
+
+Registro cronológico de todas las jornadas de inventariado realizadas.
+
+Cada sesión aparece como una tarjeta con:
+- **Fecha** de creación (formato largo en español peruano).
+- **Badge de estado**: *En curso* (con animación pulse) o *Finalizada*.
+- **Ubicación**: Pabellón y laboratorio.
+- **Detalle**: Armario asignado.
+
+---
+
+### `/estadisticas` — Estadísticas Globales
+
+Panel de métricas sobre todo el patrimonio tecnológico registrado en el sistema.
+
+**Información mostrada:**
+- **Total de activos** y **total de sesiones** registradas (tarjetas destacadas).
+- **Distribución por Tipo**: Barras de progreso proporcionales para cada categoría de dispositivo (laptop, monitor, etc.).
+- **Estado de Conservación**: Lista con conteo de activos por estado (Bueno, Regular, Malo, etc.).
 
 ---
 
 ## Estructura del Proyecto
 
+A continuación se detalla la organización de las carpetas dentro de `src/`:
+
 ```
 src/
-├── api/                        # Funciones axios organizadas por feature
-│   ├── client.ts               # Instancia base de axios con baseURL e interceptors
-│   ├── ocr.ts                  # Llamadas a /api/ocr/*
-│   ├── voz.ts                  # Llamadas a /api/voz/*
-│   ├── sesion.ts               # Llamadas a /api/sesion/*
-│   ├── dashboard.ts            # Llamadas a /api/dashboard/*
-│   ├── busqueda.ts             # Llamadas a /api/busqueda
-│   └── exportar.ts             # Llamadas a /api/exportar/*
-│
-├── components/
-│   ├── ui/                     # Componentes generados por shadcn (no editar a mano)
-│   └── shared/                 # Componentes reutilizables propios
-│       ├── Layout.tsx
-│       ├── PageHeader.tsx
-│       ├── FormField.tsx
-│       ├── LoadingSpinner.tsx
-│       └── ErrorMessage.tsx
-│
-├── pages/                      # Una carpeta por pantalla
-│   ├── Sesion/
-│   │   ├── index.tsx
-│   │   └── SesionForm.tsx
-│   ├── Camara/
-│   │   ├── index.tsx
-│   │   ├── CamaraCaptura.tsx
-│   │   └── ResultadoOCR.tsx
-│   ├── Voz/
-│   │   ├── index.tsx
-│   │   ├── GrabadorVoz.tsx
-│   │   └── ResultadoVoz.tsx
-│   ├── Dashboard/
-│   │   ├── index.tsx
-│   │   └── ActivoCard.tsx
-│   └── Busqueda/
-│       └── index.tsx
-│
-├── schemas/                    # Validaciones Zod por feature
-│   ├── sesion.schema.ts
-│   ├── dispositivo.schema.ts
-│   └── busqueda.schema.ts
-│
-├── store/
-│   └── sesionStore.ts          # Zustand: sesion_id, laboratorio y armario activos
-│
-├── types/
-│   └── index.ts                # Interfaces TypeScript (Dispositivo, Sesion, etc.)
-│
-├── hooks/                      # Lógica de negocio desacoplada de la UI
-│   ├── useOCR.ts
-│   ├── useVoz.ts
-│   └── useSesion.ts
-│
-├── lib/
-│   └── utils.ts                # cn() de shadcn y utilidades generales
-│
-├── router.tsx                  # Definición de rutas con react-router-dom
-├── App.tsx
-├── main.tsx
-└── index.css
+├── api/              # Funciones de Axios para comunicación con el backend FastAPI.
+├── components/       # Componentes React.
+│   ├── shared/       # Componentes reutilizables propios (Layout, BottomNav, ActivoCard, etc).
+│   └── ui/           # Componentes instalados desde shadcn/ui.
+├── hooks/            # Hooks personalizados para lógica de negocio desacoplada.
+├── lib/              # Tipos y utilidades compartidas (cn, validaciones).
+├── pages/            # Pantallas o rutas completas de la aplicación.
+│   ├── Busqueda/     # Búsqueda en tiempo real de activos.
+│   ├── Camara/       # Captura de imagen y resultado OCR.
+│   ├── Dashboard/    # Vista de jornada + exportación.
+│   ├── Estadisticas/ # Métricas globales del inventario.
+│   ├── Historial/    # Historial de sesiones pasadas.
+│   ├── Session/      # Formulario de configuración de sesión.
+│   └── Voz/          # Grabador de voz y resultado de dictado/consulta.
+├── schemas/          # Definiciones de validación (Zod) para formularios.
+├── store/            # Gestión de estado global con Zustand (sesiones).
+├── types/            # Interfaces y tipos de TypeScript compartidos.
+├── App.tsx           # Componente raíz.
+├── main.tsx          # Punto de entrada de la aplicación.
+├── router.tsx        # Configuración de rutas (React Router 7).
+└── index.css         # Estilos globales y variables de Tailwind.
 ```
-
----
-
-## Variables de Entorno
-
-Copia el archivo de ejemplo antes de iniciar:
-
-```bash
-cp .env.example .env
-```
-
-| Variable       | Descripción                  | Ejemplo                 |
-| -------------- | ---------------------------- | ----------------------- |
-| `VITE_API_URL` | URL base del backend FastAPI | `http://localhost:8000` |
-
-> Solo se necesita esta variable. Toda la lógica de IA vive en el backend.
 
 ---
 
 ## Requisitos Previos
 
-- **Node.js** 22+
-- **pnpm** 10+
+- **Node.js** 22 o superior.
+- **pnpm** 10 o superior.
 
 ```bash
-# Verificar versiones
 node -v
 pnpm -v
 ```
 
 ---
 
-## Instalación y Setup
+## Instalación y Configuración
 
 **1. Clonar el repositorio**
-
 ```bash
 git clone https://github.com/JosepRivera/tecsup-inventory-web.git
 cd tecsup-inventory-web
 ```
 
 **2. Instalar dependencias**
-
 ```bash
 pnpm install
 ```
 
 **3. Configurar variables de entorno**
-
+Copia el archivo de ejemplo y configura tu URL de API:
 ```bash
 cp .env.example .env
-# Edita .env y apunta VITE_API_URL al backend
 ```
+Edita `.env` y apunta `VITE_API_URL` al backend (por defecto `http://localhost:8000`).
 
-**4. Levantar el servidor de desarrollo**
+---
+
+## Inicialización y Tecnologías
+
+El proyecto ha sido inicializado con las mejores prácticas modernas:
+
+- **Framework**: Vite con el plugin de React SWC para compilación ultra rápida.
+- **Linter & Formatter**: Biome para un mantenimiento de código rápido y unificado.
+- **Estilos**: Tailwind CSS v4, que permite una configuración más limpia y moderna.
+- **Estado**: Zustand para una gestión de estado ligera sin el boilerplate de Redux.
+
+---
+
+## Uso de shadcn/ui
+
+Este proyecto utiliza **shadcn/ui** para componentes de interfaz consistentes y accesibles.
+
+### Para añadir un nuevo componente:
+Si necesitas un componente que no está en `src/components/ui`, instálalo usando `npx`:
 
 ```bash
-pnpm dev
+npx shadcn@latest add [nombre-del-componente]
 ```
 
-La app estará disponible en `http://localhost:5173`.
-
-Para acceder desde el celular en la misma red WiFi:
-
-```bash
-pnpm dev --host
-# Abre la IP local que muestra Vite (ej: http://192.168.1.x:5173)
-```
-
-> El backend debe estar corriendo antes de usar la app. Ver [tecsup-inventory-api](https://github.com/JosepRivera/tecsup-inventory-api).
+### Personalización:
+Los componentes se instalan directamente en tu código fuente (`src/components/ui`), lo que te permite modificarlos libremente si el diseño lo requiere.
 
 ---
 
 ## Scripts Disponibles
 
-| Comando           | Descripción                                         |
-| ----------------- | --------------------------------------------------- |
-| `pnpm dev`        | Servidor de desarrollo con hot-reload               |
-| `pnpm dev --host` | Servidor accesible desde el celular en la misma red |
-| `pnpm build`      | Build de producción (TypeScript + Vite)             |
-| `pnpm preview`    | Preview del build de producción                     |
-| `pnpm lint`       | Linter con Biome                                    |
-| `pnpm format`     | Formatea el código con Biome                        |
-| `pnpm check`      | Lint + format + organiza imports en un solo comando |
-
----
-
-## Backend Requerido
-
-Este frontend no funciona de forma standalone — requiere el backend [tecsup-inventory-api](https://github.com/JosepRivera/tecsup-inventory-api) corriendo localmente o en un servidor accesible.
-
-Consulta el README del backend para instrucciones de instalación.
+| Comando | Descripción |
+| :--- | :--- |
+| `pnpm dev` | Servidor de desarrollo con Hot Reload. |
+| `pnpm dev --host` | Servidor accesible desde otros dispositivos en la red. |
+| `pnpm build` | Compila el proyecto para producción. |
+| `pnpm check` | Formatea el código y analiza errores con Biome. |
+| `pnpm preview` | Previsualiza el build de producción localmente. |
 
 ---
 
@@ -258,11 +271,11 @@ Consulta el README del backend para instrucciones de instalación.
 
 Desarrollado por estudiantes de **Diseño y Desarrollo de Software** — Tecsup, 2026.
 
-| Nombre                                | GitHub                                                                                                                                  |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **Rivera Munarez, Josep Danton**      | [![GitHub](https://img.shields.io/badge/GitHub-JosepRivera-181717?style=for-the-badge&logo=github)](https://github.com/JosepRivera)     |
-| **Casapaico Aquino, Alex Luis**       | [![GitHub](https://img.shields.io/badge/GitHub-AlexCasapaico-181717?style=for-the-badge&logo=github)](https://github.com/AlexCasapaico) |
-| **Ramos Chamorro, Milagros Madelein** | [![GitHub](https://img.shields.io/badge/GitHub-MilagrosRamos-181717?style=for-the-badge&logo=github)](https://github.com/MilagrosRamos) |
+| Nombre | GitHub |
+| :--- | :--- |
+| **Rivera Munarez, Josep Danton** | [JosepRivera](https://github.com/JosepRivera) |
+| **Casapaico Aquino, Alex Luis** | [AlexCasapaico](https://github.com/AlexCasapaico) |
+| **Ramos Chamorro, Milagros Madelein** | [MilagrosRamos](https://github.com/MilagrosRamos) |
 
 ---
 
