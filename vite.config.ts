@@ -4,13 +4,19 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vitest/config";
+
+const isDev = process.env.NODE_ENV !== "production";
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    https: {
-      cert: fs.readFileSync("192.168.18.243.pem"),
-      key: fs.readFileSync("192.168.18.243-key.pem"),
-    },
+    ...(isDev &&
+      fs.existsSync("192.168.18.243.pem") && {
+        https: {
+          cert: fs.readFileSync("192.168.18.243.pem"),
+          key: fs.readFileSync("192.168.18.243-key.pem"),
+        },
+      }),
     host: true,
   },
   resolve: {
