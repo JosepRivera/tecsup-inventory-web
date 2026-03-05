@@ -264,8 +264,30 @@ Los componentes se instalan directamente en tu código fuente (`src/components/u
 | `pnpm build` | Compila el proyecto para producción. |
 | `pnpm check` | Formatea el código y analiza errores con Biome. |
 | `pnpm preview` | Previsualiza el build de producción localmente. |
+| `pnpm test` | Ejecuta las pruebas automatizadas (Vitest + RTL). |
 
 ---
+
+## Despliegue en Vercel
+
+- Este proyecto está configurado para desplegarse como sitio estático con Vercel usando PNPM y Vite.
+- Archivos clave para el despliegue ya están en el repo:
+  - vercel.json: configuración de build estático y routing tipo SPA.
+  - package.json: engines para Node >=18 y script de build que genera dist.
+  - src/api/client.ts: incorpora fallback a la API pública si no se define VITE_API_URL.
+- Backend de referencia: https://tecsup-inventory-api.onrender.com/
+
+Pasos para desplegar:
+   - VITE_API_URL (opcional si usas fallback): apunta a tu API pública. Si no lo haces, la app usará https://tecsup-inventory-api.onrender.com/ por defecto.
+   - CORS en tu backend: añade tu dominio de Vercel (por ejemplo, https://tu-app.vercel.app o *.vercel.app) como origen permitido.
+4) Despliega. Vercel ejecutará pnpm install y pnpm run build, generando el directorio dist asociado.
+5) Verifica el sitio desplegado visitando la URL de tu proyecto en Vercel. Realiza pruebas de flujo (Login, OCR, búsqueda, exportación).
+
+Notas útiles:
+- Si el backend necesita credenciales, usa Environment Variables para no exponerlas en el código.
+- Si cambias la URL de la API, actualiza VITE_API_URL en Vercel y reconstruye.
+- Para pruebas locales, puedes simular la URL de la API en .env y correr pnpm run build seguido de pnpm run preview.
+
 
 ## Equipo
 

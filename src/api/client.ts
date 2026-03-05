@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// Use explicit API URL from environment, with a safe production-default
+// Fallback to the public API when not provided (helps deployed environments)
+const apiBase: string =
+  (import.meta.env.VITE_API_URL as string) || "https://tecsup-inventory-api.onrender.com";
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: apiBase,
   timeout: 30000,
 });
 
